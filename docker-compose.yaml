@@ -45,25 +45,23 @@ services:
     ports:
       - "8083:8081" # Доступ через http://localhost:8083
 
+  java-app:
+    image: app:latest
+    container_name: java-app-container
+    restart: always
+    depends_on:
+      - mysql
+      - redis
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: root
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
 
-#  app:
-#    image: my-app:latest
-#    container_name: my-app-container
-#    build:
-#      context: .
-#      dockerfile: Dockerfile
-#    restart: always
-#    depends_on:
-#      - mysql
-#      - redis
-#    ports:
-#      - "8080:8080" # Приложение доступно на хосте через порт 8080
-#    environment:
-#      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/my_database
-#      SPRING_DATASOURCE_USERNAME: app_user
-#      SPRING_DATASOURCE_PASSWORD: app_password
-#      REDIS_HOST: redis
-#      REDIS_PORT: 6379
+
+
 volumes:
   mysql_data:
   redis_data:
