@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-container
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: project_4db
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  redis:
+    image: redis:7.0
+    container_name: redis-container
+    restart: always
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: phpmyadmin-container
+    restart: always
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: admin
+      PMA_PASSWORD: root
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: redis-commander
+    restart: always
+    environment:
+      - REDIS_HOSTS=local:redis:6379 # Название сервиса Redis в сети Docker
+    ports:
+      - "8083:8081" # Доступ через http://localhost:8083
+
+
+#  app:
+#    image: my-app:latest
+#    container_name: my-app-container
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    restart: always
+#    depends_on:
+#      - mysql
+#      - redis
+#    ports:
+#      - "8080:8080" # Приложение доступно на хосте через порт 8080
+#    environment:
+#      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/my_database
+#      SPRING_DATASOURCE_USERNAME: app_user
+#      SPRING_DATASOURCE_PASSWORD: app_password
+#      REDIS_HOST: redis
+#      REDIS_PORT: 6379
+volumes:
+  mysql_data:
+  redis_data:
