@@ -1,15 +1,17 @@
-package dao;
+package mysql.dao;
 
 
-import domain.City;
-import domain.Country;
+import mysql.domain.City;
+import mysql.domain.Country;
 import lombok.AllArgsConstructor;
+import mysql.domain.CountryLanguage;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @AllArgsConstructor
 public class CityDAO {
@@ -46,5 +48,22 @@ public class CityDAO {
             return allCities;
         }
 
+    }
+
+    public City getById(Integer id) {
+        Query<City> query = sessionFactory.getCurrentSession().createQuery("select c from City c join fetch c.country where c.id = :ID", City.class);
+        query.setParameter("ID", id);
+        return query.getSingleResult();
+    }
+
+    public void testMysqlData(List<Integer> ids) {
+        try (Session session = sessionFactory.getCurrentSession()) {
+            session.beginTransaction();
+            for (Integer id : ids) {
+                City city = getById(id);
+                Set<CountryLanguage> languages = city.getCountry().getLanguages();
+            }
+            session.getTransaction().commit();
+        }
     }
 }

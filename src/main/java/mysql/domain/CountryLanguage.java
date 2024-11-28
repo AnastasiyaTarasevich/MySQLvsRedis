@@ -1,4 +1,4 @@
-package domain;
+package mysql.domain;
 
 
 import jakarta.persistence.*;

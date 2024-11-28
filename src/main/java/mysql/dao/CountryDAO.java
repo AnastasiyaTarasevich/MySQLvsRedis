@@ -1,6 +1,6 @@
-package dao;
+package mysql.dao;
 
-import domain.Country;
+import mysql.domain.Country;
 
 import lombok.AllArgsConstructor;
 import org.hibernate.SessionFactory;
