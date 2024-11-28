@@ -1,23 +1,18 @@
-import com.fasterxml.jackson.core.JsonProcessingException;
-import io.lettuce.core.RedisClient;
-import io.lettuce.core.RedisURI;
-import io.lettuce.core.api.StatefulRedisConnection;
-import io.lettuce.core.api.sync.RedisStringCommands;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
+import connection.ConnectionManager;
+import io.lettuce.core.RedisClient;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import mysql.dao.CityDAO;
 import mysql.dao.CountryDAO;
 import mysql.domain.City;
-import mysql.domain.Country;
-import mysql.domain.CountryLanguage;
+
 import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
-import org.hibernate.cfg.Environment;
+
 import redis.dao.CityCountryDAO;
 import redis.domain.CityCountry;
 
 import java.util.List;
-import java.util.Properties;
+
 
 import static java.util.Objects.nonNull;
 
@@ -31,41 +26,15 @@ public class Main {
     private final CityCountryDAO cityCountryDAO;
 
     public Main() {
-        sessionFactory = prepareRelationalDb();
+        ConnectionManager connectionManager = new ConnectionManager();
+        sessionFactory = connectionManager.createMySQLSessionFactory();
 
         CountryDAO countryDAO = new CountryDAO(sessionFactory);
         cityDAO = new CityDAO(sessionFactory, countryDAO);
         cityCountryDAO=new CityCountryDAO();
 
-        redisClient = prepareRedisClient();
+        redisClient = connectionManager.createRedisClient();
         mapper = new ObjectMapper();
-    }
-    private SessionFactory prepareRelationalDb() {
-        final SessionFactory sessionFactory;
-        Properties properties = new Properties();
-        properties.put(Environment.DIALECT, "org.hibernate.dialect.MySQL8Dialect");
-        properties.put(Environment.DRIVER, "com.p6spy.engine.spy.P6SpyDriver");
-        properties.put(Environment.URL, "jdbc:p6spy:mysql://localhost:3306/project_4db");
-        properties.put(Environment.USER, "admin");
-        properties.put(Environment.PASS, "root");
-        properties.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "thread");
-        properties.put(Environment.HBM2DDL_AUTO, "validate");
-        properties.put(Environment.STATEMENT_BATCH_SIZE, "100");
-
-        sessionFactory = new Configuration()
-                .addAnnotatedClass(City.class)
-                .addAnnotatedClass(Country.class)
-                .addAnnotatedClass(CountryLanguage.class)
-                .addProperties(properties)
-                .buildSessionFactory();
-        return sessionFactory;
-    }
-    private RedisClient prepareRedisClient() {
-        RedisClient redisClient = RedisClient.create(RedisURI.create("localhost", 6379));
-        try (StatefulRedisConnection<String, String> connection = redisClient.connect()) {
-            System.out.println("\nConnected to Redis\n");
-        }
-        return redisClient;
     }
 
     public static void main(String[] args) {
